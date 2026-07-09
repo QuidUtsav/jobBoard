@@ -1,4 +1,5 @@
-from fastapi import FastAPI,Depends, HTTPException
+from fastapi import FastAPI,Depends, HTTPException,Inte
+from sqlalchemy.exc import IntegrityError
 from database import SessionLocal
 from schemas import AccountREsponse,CreateAccount
 from database import Account,Application,Post
@@ -29,6 +30,11 @@ def create_acc(account:CreateAccount, db=Depends(get_db)):
         role=account.role
     )
     db.add(new_acc)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=404, detail="email already in use.")
+        
     db.refresh(new_acc)
     return new_acc
