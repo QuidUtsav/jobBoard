@@ -7,6 +7,7 @@ CREATE TABLE accounts (
 );
 
 
+
 CREATE TABLE posts (
 	id SERIAL PRIMARY KEY,  
 	title VARCHAR(255) NOT NULL,
@@ -16,6 +17,8 @@ CREATE TABLE posts (
     expiry_date TIMESTAMPTZ NOT NULL
 	
 );
+
+
 
 CREATE TABLE applications (
 	id SERIAL PRIMARY KEY,
