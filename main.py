@@ -1,9 +1,10 @@
-from fastapi import FastAPI,Depends, HTTPException,Inte
+from fastapi import FastAPI,Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from database import SessionLocal
 from schemas import AccountREsponse,CreateAccount
 from database import Account,Application,Post
-from auth import hash_password
+from auth import hash_password,verify_password,generate_jwt_token
+from fastapi.security import OAuth2PasswordRequestForm
 def get_db():
     db= SessionLocal()
     try:
@@ -38,3 +39,13 @@ def create_acc(account:CreateAccount, db=Depends(get_db)):
         
     db.refresh(new_acc)
     return new_acc
+@app.post("/login")
+def login(form_data:OAuth2PasswordRequestForm = Depends(),db=Depends(get_db)):
+    acc = db.query(Account).filter(Account.email==form_data.username).first()
+    if acc is None:
+        raise HTTPException(status_code=404, detail="acc not found.")
+    if verify_password(form_data.password,acc.hashed_password):
+        token = generate_jwt_token({"sub":str(acc.id)})
+        return {"token":token,"token_type":"bearer","acc_type":acc.role}
+    else:
+        raise HTTPException(status_code=403, detail="password incorrect")
