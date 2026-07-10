@@ -1,7 +1,7 @@
 from fastapi import FastAPI,Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from database import SessionLocal
-from schemas import AccountREsponse,CreateAccount,GetPost,CreatePost
+from schemas import AccountREsponse,CreateAccount,CreateApplication,CreatePost
 from database import Account,Application,Post
 from auth import hash_password,verify_password,generate_jwt_token,get_current_acount
 from fastapi.security import OAuth2PasswordRequestForm
@@ -64,3 +64,42 @@ def create_post(post : CreatePost, db = Depends(get_db),current_acc =Depends(get
     db.commit()
     db.refresh(new_post)
     return new_post
+
+@app.get("/post/{post_id}/applications")
+def get_application_on_post(post_id:int, db = Depends(get_db),current_acc = Depends(get_current_acount)):
+    post = db.query(Post).filter(Post.id==post_id).first()
+    if post is None:
+        raise HTTPException(status_code=404, detail="post not found")
+    
+    if (post.author_id==current_acc.id):
+        application= db.query(Application).filter(Application.post_id==post_id).all()
+    else:
+        raise HTTPException(status_code=403, detail="you cannot access this page")
+    return application
+
+@app.post("/application")
+def apply_application(application:CreateApplication,db=Depends(get_db),current_account=Depends(get_current_acount)):
+    if application.post_id is None:
+        raise HTTPException(status_code=404,detail="post does not exist")
+    post = db.query(Post).filter(application.post_id==Post.id).first()
+    if post.expiry_date:
+        raise HTTPException(status_code=404, detail="this post has stopped taking response")
+    if current_account.role=="freelancer":
+        new_application = Application(content=application.content, post_id = application.post_id,user_id= current_account.id)
+        db.add(new_application)
+        db.commit()
+        db.refresh(new_application)
+        return new_application
+    else:
+        raise HTTPException(status_code=403,detail="only freelancer role can apply")  
+      
+@app.get("/application/{user_id}")
+def get_all_application_by_user(user_id:int, db=Depends(get_db),current_user=Depends(get_current_acount)):
+    user = db.query(Account).filter(user_id==Account.id).first()
+    if user is None:
+        raise HTTPException(status_code=404,detail="user not found")
+    if current_user.id == user.id:
+        application = db.query(Application).filter(Application.user_id==user_id).all()
+        return application
+    else:
+        raise HTTPException(status_code=403, detail="you cannot access this page")

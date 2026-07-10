@@ -24,3 +24,7 @@ class CreatePost(BaseModel):
     title:str
     content:str
     
+class CreateApplication(BaseModel):
+    content:str
+    post_id:int
+    
