@@ -1,9 +1,9 @@
 from fastapi import FastAPI,Depends, HTTPException
 from sqlalchemy.exc import IntegrityError
 from database import SessionLocal
-from schemas import AccountREsponse,CreateAccount
+from schemas import AccountREsponse,CreateAccount,GetPost,CreatePost
 from database import Account,Application,Post
-from auth import hash_password,verify_password,generate_jwt_token
+from auth import hash_password,verify_password,generate_jwt_token,get_current_acount
 from fastapi.security import OAuth2PasswordRequestForm
 def get_db():
     db= SessionLocal()
@@ -39,6 +39,7 @@ def create_acc(account:CreateAccount, db=Depends(get_db)):
         
     db.refresh(new_acc)
     return new_acc
+
 @app.post("/login")
 def login(form_data:OAuth2PasswordRequestForm = Depends(),db=Depends(get_db)):
     acc = db.query(Account).filter(Account.email==form_data.username).first()
@@ -46,6 +47,20 @@ def login(form_data:OAuth2PasswordRequestForm = Depends(),db=Depends(get_db)):
         raise HTTPException(status_code=404, detail="acc not found.")
     if verify_password(form_data.password,acc.hashed_password):
         token = generate_jwt_token({"sub":str(acc.id)})
-        return {"token":token,"token_type":"bearer","acc_type":acc.role}
+        return {"access_token":token,"token_type":"bearer","acc_type":acc.role}
     else:
         raise HTTPException(status_code=403, detail="password incorrect")
+
+@app.get("/posts")
+def get_post(db = Depends(get_db), ):
+    posts= db.query(Post).all()
+    return posts
+@app.post("/posts")
+def create_post(post : CreatePost, db = Depends(get_db),current_acc =Depends(get_current_acount)):
+    if current_acc.role!="hirer":
+        raise HTTPException(status_code=403,detail="only hirer can post")
+    new_post = Post(title=post.title,content = post.content,author_id = current_acc.id)
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    return new_post
