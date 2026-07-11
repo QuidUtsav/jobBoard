@@ -5,7 +5,8 @@ class CreateAccount(BaseModel):
     email:EmailStr
     password:str
     role:str
-class AccountREsponse(BaseModel):
+class AccountResponse(BaseModel):
+    id:int
     name:str
     email:EmailStr
     role:str
@@ -13,6 +14,10 @@ class AccountREsponse(BaseModel):
     class Config:
         from_attributes=True
         
+class PublicAccountResponse(BaseModel):
+    name:str
+    role:str
+    
 class GetPost(BaseModel):
     id:int
     title:str
