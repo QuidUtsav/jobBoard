@@ -18,12 +18,11 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "https://job-board-7ahc4a8sn-utsav14.vercel.app/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 @app.get("/accounts",response_model=list[PublicAccountResponse])
 def get_accounts(db=Depends(get_db),current_account= Depends(get_current_acount)):
 
