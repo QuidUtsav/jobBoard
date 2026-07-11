@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "https://jobboard-o45t.onrender.com";
 
 // Reads the JWT out of localStorage. Returns null if not logged in.
 function getToken() {
