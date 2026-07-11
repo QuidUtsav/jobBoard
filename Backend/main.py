@@ -2,7 +2,7 @@ from fastapi import FastAPI,Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 from database import SessionLocal
-from schemas import PublicAccountResponse,AccountResponse,CreateAccount,CreateApplication,CreatePost
+from schemas import PublicAccountResponse,AccountResponse,CreateAccount,CreateApplication,CreatePost,UpdateApplication
 from database import Account,Application,Post
 from auth import hash_password,verify_password,generate_jwt_token,get_current_acount
 from fastapi.security import OAuth2PasswordRequestForm
@@ -152,7 +152,7 @@ def delete_post(post_id:int, db=Depends(get_db),current_account=Depends(get_curr
     return "deleted sucessfully"
     
 @app.put("/application/{application_id}")
-def edit_application(application_id:int, updated_application:CreateApplication,db=Depends(get_db),current_account=Depends(get_current_acount)):
+def edit_application(application_id:int, updated_application:UpdateApplication,db=Depends(get_db),current_account=Depends(get_current_acount)):
     application = db.query(Application).filter(Application.id==application_id).first()
     if application is None:
         raise HTTPException(status_code=404, detail="application not found")
