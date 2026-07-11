@@ -18,7 +18,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://job-board-7ahc4a8sn-utsav14.vercel.app"],
+    allow_origins=["http://localhost:5173", "https://job-board-rho-seven.vercel.app/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
