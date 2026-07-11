@@ -1,4 +1,4 @@
-const BASE_URL = "https://job-board-j5a2mpbs9-utsav14.vercel.app";
+const BASE_URL = "https://jobboard-o45t.onrender.com";
 
 // Reads the JWT out of localStorage. Returns null if not logged in.
 function getToken() {
