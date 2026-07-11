@@ -32,4 +32,5 @@ class CreatePost(BaseModel):
 class CreateApplication(BaseModel):
     content:str
     post_id:int
-    
+class UpdateApplication(BaseModel):
+    content: str
